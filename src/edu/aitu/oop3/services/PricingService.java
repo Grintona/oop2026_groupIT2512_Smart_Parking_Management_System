@@ -12,16 +12,24 @@ public class PricingService {
         this.tariffRepository = tariffRepository;
     }
 
-    public int calculatePrice(Reservation reservation, int hours) {
-        if (hours <= 0) {
-            throw new IllegalArgumentException("Hours must be positive");
+    public int calculatePrice(Reservation reservation) {
+
+        if (reservation.getEndTime() == null) {
+            throw new IllegalStateException("Reservation is not finished yet");
         }
+
+        long diffMillis = reservation.getEndTime().getTime()
+                - reservation.getStartTime().getTime();
+
+        long hours = diffMillis / (1000 * 60 * 60);
 
         Tariff tariff = tariffRepository.findById(reservation.getTariffId());
         if (tariff == null) {
-            throw new RuntimeException("Tariff not found: " + reservation.getTariffId());
+            throw new RuntimeException(
+                    "Tariff not found: " + reservation.getTariffId()
+            );
         }
 
-        return tariff.getPricePerHour() * hours;
+        return (int) hours * tariff.getPricePerHour();
     }
 }
