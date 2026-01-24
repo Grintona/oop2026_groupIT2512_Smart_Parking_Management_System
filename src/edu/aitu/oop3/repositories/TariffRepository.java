@@ -13,7 +13,7 @@ public class TariffRepository {
     public Tariff findById(int id) {
         String sql = "select id, name, price_per_hour from tariffs where id = ?";
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+            PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setInt(1, id);
             ResultSet rs = ps.executeQuery();
@@ -35,7 +35,7 @@ public class TariffRepository {
     public void save(Tariff tariff) {
         String sql = "insert into tariffs(name, pricePerHour) values (?, ?)";
         try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+            PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, tariff.getName());
             ps.setInt(2, tariff.getPricePerHour());
