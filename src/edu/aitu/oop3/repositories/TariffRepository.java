@@ -7,8 +7,34 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TariffRepository {
+    public List<Tariff> findAllTariffs() {
+        String sql = "select id, name, price_per_hour from tariffs order by id";
+        List<Tariff> tariffs = new ArrayList<>();
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Tariff tariff = new Tariff(
+                        rs.getInt("id"),
+                        rs.getString("name"),
+                        rs.getInt("price_per_hour")
+                );
+                tariffs.add(tariff);
+            }
+
+            return tariffs;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public Tariff findById(int id) {
         String sql = "select id, name, price_per_hour from tariffs where id = ?";

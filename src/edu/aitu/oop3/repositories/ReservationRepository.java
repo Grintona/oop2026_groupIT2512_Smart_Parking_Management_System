@@ -4,6 +4,8 @@ import edu.aitu.oop3.db.DatabaseConnection;
 import edu.aitu.oop3.entities.Reservation;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReservationRepository {
     public int createReservation(int vehicleId, int spotId, int tariffId, Timestamp startTime) {
@@ -83,6 +85,33 @@ public class ReservationRepository {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public List<Reservation> findAllVehicleNumberReservations(int vehicleId) {
+        String sql = "select id, vehicle_id, spot_id, tariff_id, start_time, end_time from reservations where vehicle_id = ?";
+        List<Reservation> reservations = new ArrayList<>();
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(sql);) {
+            preparedStatement.setInt(1, vehicleId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int spotId = rs.getInt("spot_id");
+                    int tariffId = rs.getInt("tariff_id");
+                    Timestamp startTime = rs.getTimestamp("start_time");
+                    Timestamp endTime = rs.getTimestamp("end_time"); // может быть null
+
+                    if (endTime == null) {
+                        reservations.add(new Reservation(id, vehicleId, spotId, tariffId, startTime));
+                    } else {
+                        reservations.add(new Reservation(id, vehicleId, spotId, tariffId, startTime, endTime));
+                    }
+                }
+                return reservations;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

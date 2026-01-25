@@ -51,7 +51,23 @@ public class Reservation {
         return endTime;
     }
 
+
     public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
     }
+    @Override
+    public String toString() {
+        String status = (endTime == null) ? "ACTIVE" : "FINISHED";
+
+        return "Reservation{" +
+                "id=" + id +
+                ", vehicleId=" + vehicleId +
+                ", spotId=" + spotId +
+                ", tariffId=" + tariffId +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", status=" + status +
+                '}';
+    }
 }
+
