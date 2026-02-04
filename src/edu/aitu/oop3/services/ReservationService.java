@@ -26,10 +26,10 @@ public class ReservationService {
         return parkingSpotRepository.findFreeSpots();
     }
 
-    public Reservation reserveSpot(String plateNumber, int tariffId) {        if (plateNumber == null || plateNumber.isBlank()) {
+    public Reservation reserveSpot(String plateNumber, int tariffId) {
+        if (plateNumber == null || plateNumber.isBlank()) {
         throw new InvalidVehiclePlateException("Plate number cannot be empty");
     }
-
         String normalized = plateNumber.trim().toUpperCase();
 
         if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
@@ -68,13 +68,11 @@ public class ReservationService {
     }
 
     public List<Reservation> listReservationsByPlate(String plateNumber) {
-
         Vehicle vehicle = vehicleRepository.findByPlate(plateNumber);
         if (vehicle == null) {
             throw new RuntimeException("Vehicle not found: " + plateNumber);
         }
         return reservationRepository.findAllVehicleNumberReservations(vehicle.getId());
     }
-
 
 }

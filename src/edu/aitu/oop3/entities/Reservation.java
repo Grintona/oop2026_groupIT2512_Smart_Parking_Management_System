@@ -8,7 +8,7 @@ public class Reservation {
     private int spotId;
     private int tariffId;
     private Timestamp startTime;
-    private Timestamp endTime; // может быть null
+    private Timestamp endTime;
 
     public Reservation(int id ,int vehicleId, int spotId, int tariffId, Timestamp startTime) {
         this.id = id;

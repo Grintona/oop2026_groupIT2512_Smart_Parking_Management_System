@@ -27,7 +27,6 @@ public class TariffRepository {
                 );
                 tariffs.add(tariff);
             }
-
             return tariffs;
 
         } catch (SQLException e) {
