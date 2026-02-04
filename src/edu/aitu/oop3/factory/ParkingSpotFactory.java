@@ -8,9 +8,7 @@ public class ParkingSpotFactory {
     private ParkingSpotFactory() {}
 
     public static ParkingSpot create(String type, int id, String spotNumber, boolean isFree) {
-        if (type == null) {
-            type = "STANDARD";
-        }
+        if (type == null) { type = "STANDARD";}
         type = type.toUpperCase();
         return switch (type) {
             case "ELECTRIC" ->  new ElectricSpot(id, spotNumber, isFree);
