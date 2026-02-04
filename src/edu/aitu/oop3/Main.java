@@ -34,6 +34,7 @@ public class Main {
             System.out.println("2) Reserve a spot");
             System.out.println("3) Release a spot");
             System.out.println("4) Calculate cost");
+            System.out.println("5) Reserve by spot number");
             System.out.println("0) Exit");
             System.out.print("Choose option: ");
 
@@ -63,7 +64,8 @@ public class Main {
                             for (ParkingSpot spot : freeSpots) {
                                 System.out.println("ID: " + spot.getId()
                                         + " | Spot: " + spot.getSpotNumber()
-                                        + " | Free: " + spot.isFree());
+                                        + " | Free: " + spot.isFree()
+                                        + " | Type: " + spot.getType());
                             }
                         }
                     }
@@ -154,6 +156,22 @@ public class Main {
                         System.out.println("\n Total cost: " + price);
                     }
 
+                    case 5 -> {
+                        System.out.print("Enter plate number: ");
+                        String plate = scanner.nextLine();
+                        System.out.print("Enter spot number: ");
+                        String spot = scanner.nextLine();
+                        List<Tariff> tariffs = tariffRepository.findAllTariffs();
+                        for (Tariff t : tariffs) {
+                            System.out.println("ID: " + t.getId()
+                                    + " | Name: " + t.getName()
+                                    + " | Price/hour: " + t.getPricePerHour());
+                        }
+                        System.out.print("Enter tariff id: ");
+                        int tariffId = Integer.parseInt(scanner.nextLine());
+                        Reservation r = reservationService.reserveSpotByNumber(plate, spot, tariffId);
+                        System.out.println("Reserved: " + r);
+                    }
                     default -> System.out.println("Unknown option. Try again.");
                 }
 
