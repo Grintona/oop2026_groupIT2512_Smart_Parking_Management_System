@@ -15,43 +15,48 @@ public class PricingService {
         this.tariffRepository = tariffRepository;
     }
 
-    public int calculateCost(Reservation reservation, String plate) {
-
+    public int calculateCost(Reservation reservation) {
         if (reservation.getEndTime() == null) {
             throw new IllegalStateException("Reservation is not finished yet");
         }
-
         long diffMillis = reservation.getEndTime().getTime()
                 - reservation.getStartTime().getTime();
-
         if (diffMillis < 0) {
             throw new IllegalStateException("End time is before start time");
         }
-
         long hours = diffMillis / (1000L * 60 * 60);
-
         int tariffId = reservation.getTariffId();
         if (tariffId == 0) {
             tariffId = TariffConfig.getInstance().getDefaultTariffId();
         }
-
         Tariff tariff = tariffRepository.findById(tariffId);
         if (tariff == null) {
             throw new RuntimeException("Tariff not found: " + tariffId);
         }
-
         int cost = (int) hours * tariff.getPricePerHour();
-        Invoice invoice = new InvoiceBuilder()
+        return (int) hours * tariff.getPricePerHour();
+
+    }
+    public Invoice buildInvoice(Reservation reservation, String plate) {
+
+        int cost = calculateCost(reservation);
+
+        long diffMillis =
+                reservation.getEndTime().getTime()
+                        - reservation.getStartTime().getTime();
+
+        long hours = Math.max(1, diffMillis / (1000L * 60 * 60));
+
+        Tariff tariff =
+                tariffRepository.findById(reservation.getTariffId());
+
+        return new InvoiceBuilder()
                 .reservationId(reservation.getId())
                 .plate(plate)
                 .tariffName(tariff.getName())
                 .hours(hours)
                 .cost(cost)
                 .build();
+    }
 
-        return invoice.getCost();
-    }
-    public Invoice buildInvoice(Reservation reservation, String plate) {
-        return null;
-    }
 }
