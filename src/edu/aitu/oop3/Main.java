@@ -1,6 +1,8 @@
 package edu.aitu.oop3;
 
 import edu.aitu.oop3.common.ListResult;
+import edu.aitu.oop3.config.TariffConfig;
+import edu.aitu.oop3.entities.Invoice;
 import edu.aitu.oop3.entities.ParkingSpot;
 import edu.aitu.oop3.entities.Reservation;
 import edu.aitu.oop3.entities.Tariff;
@@ -77,33 +79,42 @@ public class Main {
                     }
 
                     case 2 -> {
-                        System.out.print("Enter plate number (example 777ABC01): ");
+
+                        System.out.print("Enter plate number: ");
                         String plateNumber = scanner.nextLine();
-                        if (plateNumber == null || plateNumber.isBlank()) {
-                            throw new InvalidVehiclePlateException("Plate number cannot be empty");
+
+                        if (plateNumber.isBlank()) {
+                            throw new InvalidVehiclePlateException("Plate empty");
                         }
+
                         String normalized = plateNumber.trim().toUpperCase();
-                        if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
-                            throw new InvalidVehiclePlateException("Invalid KZ plate number format. Example: 777ABC01");
-                        }
-                        System.out.println("\n**********************AVAILABLE TARIFFS**********************");
+
+                        System.out.println("\nAvailable tariffs:");
+
                         List<Tariff> tariffs = tariffRepository.findAllTariffs();
-                        if (tariffs.isEmpty()) {
-                            System.out.println("No tariffs found in database!");
-                            break;
-                        }
+
                         for (Tariff t : tariffs) {
-                            System.out.println("ID: " + t.getId()
-                                    + " | Name: " + t.getName()
-                                    + " | Price/hour: " + t.getPricePerHour());
+                            System.out.println(t);
                         }
-                        System.out.print("Enter tariff id: ");
-                        int tariffId = Integer.parseInt(scanner.nextLine());
-                        Reservation reservation = reservationService.reserveSpot(plateNumber, tariffId);
-                        System.out.println("\nReserved successfully!");
-                        System.out.println("Reservation ID: " + reservation.getId());
-                        System.out.println("Spot ID: " + reservation.getSpotId());
-                        System.out.println("Start time: " + reservation.getStartTime());
+
+                        System.out.print("Enter tariff id (Enter = default): ");
+
+                        String input = scanner.nextLine();
+
+                        int tariffId;
+
+                        if (input.isBlank()) {
+                            tariffId = TariffConfig.getInstance().getDefaultTariffId();
+                            System.out.println("Using default tariff: " + tariffId);
+                        } else {
+                            tariffId = Integer.parseInt(input);
+                        }
+
+                        Reservation reservation =
+                                reservationService.reserveSpot(normalized, tariffId);
+
+                        System.out.println("Reserved successfully!");
+                        System.out.println(reservation);
                     }
                     case 3 -> {
                         System.out.print("Enter vehicle plate number: ");
@@ -133,68 +144,82 @@ public class Main {
                         System.out.println("End time: " + finished.getEndTime());
                     }
 
-
                     case 4 -> {
-                        System.out.print("Enter vehicle plate number: ");
-                        String plateNumber = scanner.nextLine();
-                        if (plateNumber == null || plateNumber.isBlank()) {
-                            throw new InvalidVehiclePlateException("Plate number cannot be empty");
-                        }
-                        String normalized = plateNumber.trim().toUpperCase();
 
-                        if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
-                            throw new InvalidVehiclePlateException(
-                                    "Invalid KZ plate format. Example: 777ABC01");
-                        }
-                        ListResult<Reservation> result = reservationService.listReservationsByPlate(normalized);
+                        System.out.print("Enter plate number: ");
+                        String plate = scanner.nextLine().trim().toUpperCase();
+
+                        ListResult<Reservation> result =
+                                reservationService.listReservationsByPlate(plate);
+
                         if (result.getTotalCount() == 0) {
                             System.out.println("No reservations found.");
                             break;
                         }
-                        System.out.println("\nReservations:");
+
                         for (Reservation r : result.getItems()) {
                             System.out.println(r);
                         }
-                        System.out.print("\nEnter reservation id to calculate price: ");
-                        int reservationId = Integer.parseInt(scanner.nextLine());
-                        Reservation reservation = reservationService.getReservationById(reservationId);
+
+                        System.out.print("Enter reservation id: ");
+
+                        int id = Integer.parseInt(scanner.nextLine());
+
+                        Reservation reservation =
+                                reservationService.getReservationById(id);
 
                         if (reservation == null) {
                             System.out.println("Reservation not found!");
                             break;
                         }
-                        int price = pricingService.calculatePrice(reservation);
-                        System.out.println("\nTotal cost: " + price);
-                    }
 
+                        Invoice invoice =
+                                pricingService.buildInvoice(reservation, plate);
+
+                        System.out.println(invoice);
+                    }
 
                     case 5 -> {
+
                         System.out.print("Enter plate number: ");
                         String plate = scanner.nextLine();
+
                         System.out.print("Enter spot number: ");
                         String spot = scanner.nextLine();
+
                         List<Tariff> tariffs = tariffRepository.findAllTariffs();
-                        for (Tariff t : tariffs) {
-                            System.out.println("ID: " + t.getId()
-                                    + " | Name: " + t.getName()
-                                    + " | Price/hour: " + t.getPricePerHour());
+                        tariffs.forEach(System.out::println);
+
+                        System.out.print("Enter tariff id (Enter = default): ");
+
+                        String input = scanner.nextLine();
+
+                        int tariffId;
+
+                        if (input.isBlank()) {
+                            tariffId = TariffConfig.getInstance().getDefaultTariffId();
+                        } else {
+                            tariffId = Integer.parseInt(input);
                         }
-                        System.out.print("Enter tariff id: ");
-                        int tariffId = Integer.parseInt(scanner.nextLine());
-                        Reservation r = reservationService.reserveSpotByNumber(plate, spot, tariffId);
-                        System.out.println("Reserved: " + r);
+
+                        Reservation r =
+                                reservationService.reserveSpotByNumber(plate, spot, tariffId);
+
+                        System.out.println("Reserved:");
+                        System.out.println(r);
                     }
-                    default -> System.out.println("Unknown option. Try again.");
+
+                    default -> System.out.println("Unknown option");
                 }
 
             } catch (InvalidVehiclePlateException e) {
-                System.out.println("Invalid plate: " + e.getMessage());
+                System.out.println(e.getMessage());
 
             } catch (NoFreeSpotsException e) {
-                System.out.println("No free spots: " + e.getMessage());
+                System.out.println(e.getMessage());
 
             } catch (ReservationAlreadyActiveOrExpiredException e) {
-                System.out.println("Reservation error: " + e.getMessage());
+                System.out.println(e.getMessage());
 
             } catch (RuntimeException e) {
                 System.out.println("Error: " + e.getMessage());

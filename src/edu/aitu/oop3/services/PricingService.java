@@ -1,5 +1,8 @@
 package edu.aitu.oop3.services;
 
+import edu.aitu.oop3.builder.InvoiceBuilder;
+import edu.aitu.oop3.config.TariffConfig;
+import edu.aitu.oop3.entities.Invoice;
 import edu.aitu.oop3.entities.Reservation;
 import edu.aitu.oop3.entities.Tariff;
 import edu.aitu.oop3.repositories.TariffRepository;
@@ -12,7 +15,7 @@ public class PricingService {
         this.tariffRepository = tariffRepository;
     }
 
-    public int calculatePrice(Reservation reservation) {
+    public int calculateCost(Reservation reservation, String plate) {
 
         if (reservation.getEndTime() == null) {
             throw new IllegalStateException("Reservation is not finished yet");
@@ -21,15 +24,34 @@ public class PricingService {
         long diffMillis = reservation.getEndTime().getTime()
                 - reservation.getStartTime().getTime();
 
-        long hours = diffMillis / (1000 * 60 * 60);
-
-        Tariff tariff = tariffRepository.findById(reservation.getTariffId());
-        if (tariff == null) {
-            throw new RuntimeException(
-                    "Tariff not found: " + reservation.getTariffId()
-            );
+        if (diffMillis < 0) {
+            throw new IllegalStateException("End time is before start time");
         }
 
-        return (int) hours * tariff.getPricePerHour();
+        long hours = diffMillis / (1000L * 60 * 60);
+
+        int tariffId = reservation.getTariffId();
+        if (tariffId == 0) {
+            tariffId = TariffConfig.getInstance().getDefaultTariffId();
+        }
+
+        Tariff tariff = tariffRepository.findById(tariffId);
+        if (tariff == null) {
+            throw new RuntimeException("Tariff not found: " + tariffId);
+        }
+
+        int cost = (int) hours * tariff.getPricePerHour();
+        Invoice invoice = new InvoiceBuilder()
+                .reservationId(reservation.getId())
+                .plate(plate)
+                .tariffName(tariff.getName())
+                .hours(hours)
+                .cost(cost)
+                .build();
+
+        return invoice.getCost();
+    }
+    public Invoice buildInvoice(Reservation reservation, String plate) {
+        return null;
     }
 }
