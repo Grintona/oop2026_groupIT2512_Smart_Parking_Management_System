@@ -133,9 +133,9 @@ public class Main {
                             break;
                         }
                         System.out.println("\nReservations:");
-                        for (Reservation r : result.getItems()) {
-                            System.out.println(r);
-                        }
+                        
+                        result.getItems().forEach(r -> System.out.println(r)); // lambda
+
                         System.out.print("\nEnter reservation id to release: ");
                         int reservationId = Integer.parseInt(scanner.nextLine());
                         Reservation finished = reservationService.releaseSpot(reservationId);
@@ -173,8 +173,7 @@ public class Main {
                             break;
                         }
 
-                        Invoice invoice =
-                                pricingService.buildInvoice(reservation, plate);
+                        Invoice invoice = pricingService.buildInvoice(reservation, plate);
 
                         System.out.println(invoice);
                     }
