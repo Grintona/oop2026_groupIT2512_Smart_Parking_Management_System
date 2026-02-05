@@ -1,5 +1,6 @@
 package edu.aitu.oop3;
 
+import edu.aitu.oop3.common.ListResult;
 import edu.aitu.oop3.entities.ParkingSpot;
 import edu.aitu.oop3.entities.Reservation;
 import edu.aitu.oop3.entities.Tariff;
@@ -56,17 +57,22 @@ public class Main {
 
                     case 1 -> {
                         System.out.println("\n**********************FREE SPOTS**********************");
-                        List<ParkingSpot> freeSpots = reservationService.listFreeSpots();
 
-                        if (freeSpots.isEmpty()) {
+                        ListResult<ParkingSpot> result = reservationService.listFreeSpots();
+
+                        if (result.getTotalCount() == 0) {
                             System.out.println("No free spots.");
-                        } else {
-                            for (ParkingSpot spot : freeSpots) {
-                                System.out.println("ID: " + spot.getId()
-                                        + " | Spot: " + spot.getSpotNumber()
-                                        + " | Free: " + spot.isFree()
-                                        + " | Type: " + spot.getType());
-                            }
+                            break;
+                        }
+                        System.out.println("Total: " + result.getTotalCount());
+
+                        for (ParkingSpot spot : result.getItems()) {
+                            System.out.println(
+                                    "ID: " + spot.getId()
+                                            + " | Spot: " + spot.getSpotNumber()
+                                            + " | Free: " + spot.isFree()
+                                            + " | Type: " + spot.getType()
+                            );
                         }
                     }
 
@@ -80,81 +86,87 @@ public class Main {
                         if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
                             throw new InvalidVehiclePlateException("Invalid KZ plate number format. Example: 777ABC01");
                         }
-
                         System.out.println("\n**********************AVAILABLE TARIFFS**********************");
                         List<Tariff> tariffs = tariffRepository.findAllTariffs();
-
                         if (tariffs.isEmpty()) {
                             System.out.println("No tariffs found in database!");
                             break;
                         }
-
                         for (Tariff t : tariffs) {
                             System.out.println("ID: " + t.getId()
                                     + " | Name: " + t.getName()
                                     + " | Price/hour: " + t.getPricePerHour());
                         }
-
                         System.out.print("Enter tariff id: ");
                         int tariffId = Integer.parseInt(scanner.nextLine());
-
                         Reservation reservation = reservationService.reserveSpot(plateNumber, tariffId);
-
                         System.out.println("\nReserved successfully!");
                         System.out.println("Reservation ID: " + reservation.getId());
                         System.out.println("Spot ID: " + reservation.getSpotId());
                         System.out.println("Start time: " + reservation.getStartTime());
                     }
-
                     case 3 -> {
-                        System.out.print("Enter reservation Vehicle Number: ");
+                        System.out.print("Enter vehicle plate number: ");
                         String plateNumber = scanner.nextLine();
                         if (plateNumber == null || plateNumber.isBlank()) {
-                            throw new InvalidVehiclePlateException("Plate number cannot be empty");
+                            throw new InvalidVehiclePlateException(
+                                    "Plate number cannot be empty");
                         }
                         String normalized = plateNumber.trim().toUpperCase();
                         if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
-                            throw new InvalidVehiclePlateException("Invalid KZ plate number format. Example: 777ABC01");
+                            throw new InvalidVehiclePlateException("Invalid KZ plate format. Example: 777ABC01");
                         }
-                        List<Reservation> reservationVehicle = reservationService.listReservationsByPlate(plateNumber);
-                        for (Reservation r : reservationVehicle) {
+                        ListResult<Reservation> result = reservationService.listReservationsByPlate(normalized);
+                        if (result.getTotalCount() == 0) {
+                            System.out.println("No reservations found.");
+                            break;
+                        }
+                        System.out.println("\nReservations:");
+                        for (Reservation r : result.getItems()) {
                             System.out.println(r);
                         }
-                        System.out.println("Enter reservation id ");
+                        System.out.print("\nEnter reservation id to release: ");
                         int reservationId = Integer.parseInt(scanner.nextLine());
                         Reservation finished = reservationService.releaseSpot(reservationId);
-                        System.out.println("\n Released successfully!");
+                        System.out.println("\nReleased successfully!");
                         System.out.println("Reservation ID: " + finished.getId());
                         System.out.println("End time: " + finished.getEndTime());
                     }
 
+
                     case 4 -> {
-                        System.out.print("Enter reservation Vehicle Number: ");
+                        System.out.print("Enter vehicle plate number: ");
                         String plateNumber = scanner.nextLine();
                         if (plateNumber == null || plateNumber.isBlank()) {
                             throw new InvalidVehiclePlateException("Plate number cannot be empty");
                         }
                         String normalized = plateNumber.trim().toUpperCase();
+
                         if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
-                            throw new InvalidVehiclePlateException("Invalid KZ plate number format. Example: 777ABC01");
+                            throw new InvalidVehiclePlateException(
+                                    "Invalid KZ plate format. Example: 777ABC01");
                         }
-                        List<Reservation> reservationVehicle = reservationService.listReservationsByPlate(plateNumber);
-                        for (Reservation r : reservationVehicle) {
+                        ListResult<Reservation> result = reservationService.listReservationsByPlate(normalized);
+                        if (result.getTotalCount() == 0) {
+                            System.out.println("No reservations found.");
+                            break;
+                        }
+                        System.out.println("\nReservations:");
+                        for (Reservation r : result.getItems()) {
                             System.out.println(r);
                         }
-                        System.out.print("Enter reservation id: ");
+                        System.out.print("\nEnter reservation id to calculate price: ");
                         int reservationId = Integer.parseInt(scanner.nextLine());
+                        Reservation reservation = reservationService.getReservationById(reservationId);
 
-                        Reservation reservation = reservationRepository.findById(reservationId);
                         if (reservation == null) {
                             System.out.println("Reservation not found!");
                             break;
                         }
-
                         int price = pricingService.calculatePrice(reservation);
-
-                        System.out.println("\n Total cost: " + price);
+                        System.out.println("\nTotal cost: " + price);
                     }
+
 
                     case 5 -> {
                         System.out.print("Enter plate number: ");

@@ -3,10 +3,9 @@ package edu.aitu.oop3.entities;
 import java.util.List;
 
 public class ParkingSpot  {
-    private int id = 0;
+    private int id ;
     private String spotNumber;
     private boolean isFree = true ;
-    private String spot_type;
 
     public ParkingSpot(int id, String spotNumber, boolean isFree) {
         this.id = id;
@@ -34,6 +33,7 @@ public class ParkingSpot  {
     public int getId() {
         return id;
     }
+
     public String getType() {
         return getClass().getSimpleName();
     }

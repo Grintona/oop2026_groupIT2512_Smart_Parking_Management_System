@@ -1,5 +1,6 @@
 package edu.aitu.oop3.services;
 
+import edu.aitu.oop3.common.ListResult;
 import edu.aitu.oop3.entities.DisabledSpot;
 import edu.aitu.oop3.entities.ParkingSpot;
 import edu.aitu.oop3.entities.Reservation;
@@ -24,9 +25,11 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<ParkingSpot> listFreeSpots() {
-        return parkingSpotRepository.findFreeSpots();
+    public ListResult<ParkingSpot> listFreeSpots() {
+        List<ParkingSpot> spots = parkingSpotRepository.findFreeSpots();
+        return new ListResult<>(spots);
     }
+
 
     public Reservation reserveSpot(String plateNumber, int tariffId) {
         if (plateNumber == null || plateNumber.isBlank()) {
@@ -69,12 +72,14 @@ public class ReservationService {
         return reservationRepository.findById(reservationId);
     }
 
-    public List<Reservation> listReservationsByPlate(String plateNumber) {
+    public ListResult<Reservation> listReservationsByPlate(String plateNumber) {
         Vehicle vehicle = vehicleRepository.findByPlate(plateNumber);
         if (vehicle == null) {
             throw new RuntimeException("Vehicle not found: " + plateNumber);
         }
-        return reservationRepository.findAllVehicleNumberReservations(vehicle.getId());
+        List<Reservation> list = reservationRepository.findAllVehicleNumberReservations(vehicle.getId());
+
+        return new ListResult<>(list);
     }
 
     public Reservation reserveSpotByNumber(String plateNumber, String spotNumber, int tariffId) {
@@ -120,4 +125,9 @@ public class ReservationService {
         parkingSpotRepository.updateFreeStatus(spot.getId(), false);
         return reservationRepository.findById(reservationId);
     }
+
+    public Reservation getReservationById(int id) {
+        return reservationRepository.findById(id);
+    }
+
 }
