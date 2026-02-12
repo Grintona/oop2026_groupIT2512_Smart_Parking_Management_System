@@ -34,7 +34,7 @@ public class PricingService {
             throw new RuntimeException("Tariff not found: " + tariffId);
         }
         int cost = (int) hours * tariff.getPricePerHour();
-        return (int) hours * tariff.getPricePerHour();
+        return cost;
 
     }
     public Invoice buildInvoice(Reservation reservation, String plate) {

@@ -2,19 +2,15 @@ package edu.aitu.oop3;
 
 import edu.aitu.oop3.common.ListResult;
 import edu.aitu.oop3.config.TariffConfig;
-import edu.aitu.oop3.entities.Invoice;
-import edu.aitu.oop3.entities.ParkingSpot;
-import edu.aitu.oop3.entities.Reservation;
-import edu.aitu.oop3.entities.Tariff;
+import edu.aitu.oop3.entities.*;
 import edu.aitu.oop3.exceptions.InvalidVehiclePlateException;
 import edu.aitu.oop3.exceptions.NoFreeSpotsException;
 import edu.aitu.oop3.exceptions.ReservationAlreadyActiveOrExpiredException;
-import edu.aitu.oop3.repositories.ParkingSpotRepository;
-import edu.aitu.oop3.repositories.ReservationRepository;
-import edu.aitu.oop3.repositories.TariffRepository;
-import edu.aitu.oop3.repositories.VehicleRepository;
-import edu.aitu.oop3.services.PricingService;
-import edu.aitu.oop3.services.ReservationService;
+
+import edu.aitu.oop3.repositories.*;
+import edu.aitu.oop3.services.*;
+
+import edu.aitu.oop3.components.*;
 
 import java.util.List;
 import java.util.Scanner;
@@ -27,8 +23,19 @@ public class Main {
         VehicleRepository vehicleRepository = new VehicleRepository();
         ReservationRepository reservationRepository = new ReservationRepository();
         TariffRepository tariffRepository = new TariffRepository();
-        ReservationService reservationService = new ReservationService(parkingSpotRepository, vehicleRepository, reservationRepository);
+        ReservationService reservationService =  new ReservationService(parkingSpotRepository, vehicleRepository, reservationRepository);
         PricingService pricingService = new PricingService(tariffRepository);
+
+        // Components
+        ReservationComponent reservationComponent =  new ReservationComponent(reservationService);
+
+        PaymentComponent paymentComponent =  new PaymentComponent(pricingService);
+
+        ReportingComponent reportingComponent = new ReportingComponent(reservationService);
+
+        MonitoringComponent monitoringComponent = new MonitoringComponent(parkingSpotRepository);
+
+        // CLI
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
@@ -60,13 +67,16 @@ public class Main {
                     case 1 -> {
                         System.out.println("\n**********************FREE SPOTS**********************");
 
-                        ListResult<ParkingSpot> result = reservationService.listFreeSpots();
+                        // ✅ ИЗМЕНЕНО — через компонент, не сервис
+                        ListResult<ParkingSpot> result =
+                                reservationComponent.listFreeSpots();
+
+                        System.out.println("Total free: " + monitoringComponent.countFreeSpots()); // ✅ показали MonitoringComponent
 
                         if (result.getTotalCount() == 0) {
                             System.out.println("No free spots.");
                             break;
                         }
-                        System.out.println("Total: " + result.getTotalCount());
 
                         for (ParkingSpot spot : result.getItems()) {
                             System.out.println(
@@ -77,134 +87,97 @@ public class Main {
                             );
                         }
                     }
-
                     case 2 -> {
 
                         System.out.print("Enter plate number: ");
                         String plateNumber = scanner.nextLine();
-
-                        if (plateNumber.isBlank()) {
-                            throw new InvalidVehiclePlateException("Plate empty");
-                        }
-
-                        String normalized = plateNumber.trim().toUpperCase();
-
                         System.out.println("\nAvailable tariffs:");
-
                         List<Tariff> tariffs = tariffRepository.findAllTariffs();
-
-                        for (Tariff t : tariffs) {
-                            System.out.println(t);
-                        }
-
+                        tariffs.forEach(System.out::println);
                         System.out.print("Enter tariff id (Enter = default): ");
-
                         String input = scanner.nextLine();
+                        int tariffId = input.isBlank()
+                                ? TariffConfig.getInstance().getDefaultTariffId()
+                                : Integer.parseInt(input);
 
-                        int tariffId;
-
-                        if (input.isBlank()) {
-                            tariffId = TariffConfig.getInstance().getDefaultTariffId();
-                            System.out.println("Using default tariff: " + tariffId);
-                        } else {
-                            tariffId = Integer.parseInt(input);
-                        }
-
-                        Reservation reservation =
-                                reservationService.reserveSpot(normalized, tariffId);
-
+                        // Using component
+                        Reservation reservation = reservationComponent.reserve(plateNumber, tariffId);
                         System.out.println("Reserved successfully!");
                         System.out.println(reservation);
                     }
+
                     case 3 -> {
                         System.out.print("Enter vehicle plate number: ");
-                        String plateNumber = scanner.nextLine();
-                        if (plateNumber == null || plateNumber.isBlank()) {
-                            throw new InvalidVehiclePlateException(
-                                    "Plate number cannot be empty");
-                        }
-                        String normalized = plateNumber.trim().toUpperCase();
-                        if (!normalized.matches("^[0-9]{3}[A-Z]{3}[0-9]{2}$")) {
-                            throw new InvalidVehiclePlateException("Invalid KZ plate format. Example: 777ABC01");
-                        }
-                        ListResult<Reservation> result = reservationService.listReservationsByPlate(normalized);
+                        String plate = scanner.nextLine();
+
+                        // using reportingComponent
+                        ListResult<Reservation> result = reportingComponent.byPlate(plate);
+
                         if (result.getTotalCount() == 0) {
                             System.out.println("No reservations found.");
                             break;
                         }
-                        System.out.println("\nReservations:");
-                        result.getItems().forEach(r -> System.out.println(r));
+                        result.getItems().forEach(System.out::println);
                         System.out.print("\nEnter reservation id to release: ");
-                        int reservationId = Integer.parseInt(scanner.nextLine());
-                        Reservation finished = reservationService.releaseSpot(reservationId);
-                        System.out.println("\nReleased successfully!");
-                        System.out.println("Reservation ID: " + finished.getId());
-                        System.out.println("End time: " + finished.getEndTime());
+                        int reservationId =
+                                Integer.parseInt(scanner.nextLine());
+
+                        // Using reservationComponent
+                        Reservation finished = reservationComponent.release(reservationId);
+
+                        System.out.println("Released!");
+                        System.out.println(finished);
                     }
 
                     case 4 -> {
 
                         System.out.print("Enter plate number: ");
-                        String plate = scanner.nextLine().trim().toUpperCase();
+                        String plate = scanner.nextLine();
 
-                        ListResult<Reservation> result =
-                                reservationService.listReservationsByPlate(plate);
-
+                        // Using reportingComponent
+                        ListResult<Reservation> result = reportingComponent.byPlate(plate);
                         if (result.getTotalCount() == 0) {
                             System.out.println("No reservations found.");
                             break;
                         }
 
-                        for (Reservation r : result.getItems()) {
-                            System.out.println(r);
-                        }
+                        result.getItems().forEach(System.out::println);
 
                         System.out.print("Enter reservation id: ");
-
                         int id = Integer.parseInt(scanner.nextLine());
 
-                        Reservation reservation =
-                                reservationService.getReservationById(id);
+                        Reservation reservation = reservationService.getReservationById(id);
 
-                        if (reservation == null) {
-                            System.out.println("Reservation not found!");
-                            break;
-                        }
-
-                        Invoice invoice = pricingService.buildInvoice(reservation, plate);
+                        //Using paymentComponent
+                        Invoice invoice = paymentComponent.buildInvoice(reservation, plate);
 
                         System.out.println(invoice);
                     }
 
                     case 5 -> {
+
                         System.out.print("Enter plate number: ");
                         String plate = scanner.nextLine();
 
                         System.out.print("Enter spot number: ");
                         String spot = scanner.nextLine();
 
-                        List<Tariff> tariffs = tariffRepository.findAllTariffs();
+                        List<Tariff> tariffs =
+                                tariffRepository.findAllTariffs();
                         tariffs.forEach(System.out::println);
 
                         System.out.print("Enter tariff id (Enter = default): ");
-
                         String input = scanner.nextLine();
 
-                        int tariffId;
+                        int tariffId = input.isBlank()
+                                ? TariffConfig.getInstance().getDefaultTariffId()
+                                : Integer.parseInt(input);
 
-                        if (input.isBlank()) {
-                            tariffId = TariffConfig.getInstance().getDefaultTariffId();
-                        } else {
-                            tariffId = Integer.parseInt(input);
-                        }
-
-                        Reservation r =
-                                reservationService.reserveSpotByNumber(plate, spot, tariffId);
-
+                        //Using reservationComponent
+                        Reservation r = reservationComponent.reserveByNumber(plate, spot, tariffId);
                         System.out.println("Reserved:");
                         System.out.println(r);
                     }
-
                     default -> System.out.println("Unknown option");
                 }
 
