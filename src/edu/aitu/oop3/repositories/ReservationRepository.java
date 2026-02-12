@@ -1,5 +1,6 @@
 package edu.aitu.oop3.repositories;
 
+import edu.aitu.oop3.components.interfaces.DataAccessComponent;
 import edu.aitu.oop3.db.DatabaseConnection;
 import edu.aitu.oop3.entities.Reservation;
 
@@ -7,7 +8,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReservationRepository {
+public class ReservationRepository implements DataAccessComponent {
     public int createReservation(int vehicleId, int spotId, int tariffId, Timestamp startTime) {
         String sql = "insert into reservations (vehicle_id, spot_id, tariff_id, start_time, end_time) values (?, ?, ?, ?, null) returning id";
         try (Connection connection = DatabaseConnection.getConnection();

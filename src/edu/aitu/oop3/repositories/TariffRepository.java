@@ -1,5 +1,6 @@
 package edu.aitu.oop3.repositories;
 
+import edu.aitu.oop3.components.interfaces.DataAccessComponent;
 import edu.aitu.oop3.db.DatabaseConnection;
 import edu.aitu.oop3.entities.Tariff;
 
@@ -10,7 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TariffRepository {
+public class TariffRepository implements DataAccessComponent {
     public List<Tariff> findAllTariffs() {
         String sql = "select id, name, price_per_hour from tariffs order by id";
         List<Tariff> tariffs = new ArrayList<>();

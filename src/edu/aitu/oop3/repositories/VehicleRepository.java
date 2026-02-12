@@ -1,5 +1,6 @@
 package edu.aitu.oop3.repositories;
 
+import edu.aitu.oop3.components.interfaces.DataAccessComponent;
 import edu.aitu.oop3.db.DatabaseConnection;
 import edu.aitu.oop3.entities.Vehicle;
 import java.sql.Connection;
@@ -7,7 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class VehicleRepository {
+public class VehicleRepository implements DataAccessComponent {
     public Vehicle findByPlate(String plateNumber){
         String sql = "select id, plate_number from vehicles where plate_number = ? ";
         try (Connection connection = DatabaseConnection.getConnection();

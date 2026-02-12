@@ -1,5 +1,6 @@
 package edu.aitu.oop3.repositories;
 
+import edu.aitu.oop3.components.interfaces.DataAccessComponent;
 import edu.aitu.oop3.db.DatabaseConnection;
 import edu.aitu.oop3.entities.ParkingSpot;
 import edu.aitu.oop3.factory.ParkingSpotFactory;
@@ -10,7 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParkingSpotRepository {
+public class ParkingSpotRepository implements DataAccessComponent {
     public List<ParkingSpot> findFreeSpots() {
         List<ParkingSpot> spots = new ArrayList<>();
         String sql = "select id, spot_number, is_free, spot_type from parking_spots where is_free = true order by id ";

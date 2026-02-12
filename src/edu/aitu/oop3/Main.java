@@ -133,9 +133,7 @@ public class Main {
                             break;
                         }
                         System.out.println("\nReservations:");
-                        
-                        result.getItems().forEach(r -> System.out.println(r)); // lambda
-
+                        result.getItems().forEach(r -> System.out.println(r));
                         System.out.print("\nEnter reservation id to release: ");
                         int reservationId = Integer.parseInt(scanner.nextLine());
                         Reservation finished = reservationService.releaseSpot(reservationId);
@@ -179,7 +177,6 @@ public class Main {
                     }
 
                     case 5 -> {
-
                         System.out.print("Enter plate number: ");
                         String plate = scanner.nextLine();
 

@@ -1,8 +1,7 @@
 package edu.aitu.oop3.entities;
 
-import java.util.List;
 
-public class ParkingSpot  {
+public class ParkingSpot {
     private int id ;
     private String spotNumber;
     private boolean isFree = true ;
