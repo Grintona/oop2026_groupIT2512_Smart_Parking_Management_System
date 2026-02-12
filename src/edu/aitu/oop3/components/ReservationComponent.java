@@ -18,12 +18,15 @@ public class ReservationComponent {
     public Reservation reserve(String plate, int tariffId){
         return reservationService.reserveSpot(plate,tariffId);
     }
+
     public Reservation reserveByNumber(String plate, String spot, int tariffId){
         return reservationService.reserveSpotByNumber(plate,spot,tariffId);
     }
+
     public Reservation release(int reservationId){
         return reservationService.releaseSpot(reservationId);
     }
+
     public ListResult<Reservation> byPlate(String plate){
         return reservationService.listReservationsByPlate(plate);
     }
