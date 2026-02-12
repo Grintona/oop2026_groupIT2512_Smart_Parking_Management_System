@@ -37,4 +37,11 @@ public class ParkingSpot {
         return getClass().getSimpleName();
     }
 
+    @Override
+    public String toString(){
+        return "ParkingSpot{" + "id=" + id +
+                ",number='" + spotNumber +
+                ",free=" + isFree +
+                ",type=" +getType()+"}";
+    }
 }

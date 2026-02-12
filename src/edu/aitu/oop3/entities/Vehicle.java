@@ -19,5 +19,10 @@ public class Vehicle {
     public void setPlateNumber(String plateNumber) {
         this.plateNumber = plateNumber;
     }
-
+    @Override
+    public String toString(){
+        return "Vehicle{" +
+                "id=" + id +
+                ",plateNumber=" + plateNumber + "}";
+    }
 }
