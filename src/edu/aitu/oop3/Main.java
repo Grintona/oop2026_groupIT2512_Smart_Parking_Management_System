@@ -66,12 +66,10 @@ public class Main {
 
                     case 1 -> {
                         System.out.println("\n**********************FREE SPOTS**********************");
-
-                        // ✅ ИЗМЕНЕНО — через компонент, не сервис
                         ListResult<ParkingSpot> result =
                                 reservationComponent.listFreeSpots();
-
-                        System.out.println("Total free: " + monitoringComponent.countFreeSpots()); // ✅ показали MonitoringComponent
+                        // using monitoringComponent
+                        System.out.println("Total free: " + monitoringComponent.countFreeSpots(result));
 
                         if (result.getTotalCount() == 0) {
                             System.out.println("No free spots.");
