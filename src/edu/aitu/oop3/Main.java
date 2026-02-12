@@ -39,7 +39,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("\n**********************PARKING SYSTEM CLI**********************");
+            System.out.println("\n***PARKING SYSTEM ***");
             System.out.println("1) List free spots");
             System.out.println("2) Reserve a spot");
             System.out.println("3) Release a spot");
@@ -65,11 +65,11 @@ public class Main {
                 switch (choice) {
 
                     case 1 -> {
-                        System.out.println("\n**********************FREE SPOTS**********************");
+                        System.out.println("\n***FREE SPOTS***");
                         ListResult<ParkingSpot> result =
                                 reservationComponent.listFreeSpots();
                         // using monitoringComponent
-                        System.out.println("Total free: " + monitoringComponent.countFreeSpots(result));
+                        System.out.println("Total free: " + monitoringComponent.countFreeSpots());
 
                         if (result.getTotalCount() == 0) {
                             System.out.println("No free spots.");

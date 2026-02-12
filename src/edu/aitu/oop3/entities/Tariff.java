@@ -31,11 +31,14 @@ public class Tariff {
         }
         this.pricePerHour = pricePerHour;
     }
+
     @Override
-    public String toString(){
-        return "Tariff{" +
-                "id="+ id +
-                ", name='" +name +
-                ", pricePerHour=" + pricePerHour + "}";
+    public String toString() {
+        return "========== TARIFF ==========\n"
+                + "ID            : " + id + "\n"
+                + "Name          : " + name + "\n"
+                + "Price per hour: " + pricePerHour + "\n"
+                + "============================";
     }
+
 }

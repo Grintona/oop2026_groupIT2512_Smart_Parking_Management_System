@@ -56,18 +56,17 @@ public class Reservation {
         this.endTime = endTime;
     }
     @Override
-    public String toString() {
-        String status = (endTime == null) ? "ACTIVE" : "FINISHED";
-
-        return "Reservation{" +
-                "id=" + id +
-                ", vehicleId=" + vehicleId +
-                ", spotId=" + spotId +
-                ", tariffId=" + tariffId +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", status=" + status +
-                '}';
+    public String toString() { String status = (endTime == null) ? "ACTIVE" : "FINISHED";
+        return "========== Reservation ==========\n"
+                + "ID             : " + id + "\n"
+                + "VehicleId      : " + vehicleId + "\n"
+                + "spotId         : " + spotId + "\n"
+                + "tariffId       : " + tariffId + "\n"
+                + "startTime      : " + startTime + "\n"
+                + "endTime        : " + endTime + "\n"
+                + "status         : " + status + "\n"
+                + "=============================";
     }
+
 }
 

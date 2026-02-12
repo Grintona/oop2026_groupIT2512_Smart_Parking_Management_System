@@ -1,0 +1,5 @@
+language: "java"
+name: "oop2026_groupIT2512_Smart_Parking_Management_System"
+appmap_dir: "tmp/appmap"
+packages:
+- path: "edu.aitu.oop3"
