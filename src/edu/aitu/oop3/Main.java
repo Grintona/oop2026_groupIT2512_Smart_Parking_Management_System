@@ -134,8 +134,8 @@ public class Main {
                         System.out.print("Enter plate number: ");
                         String plate = scanner.nextLine();
 
-                        // Using reportingComponent
                         ListResult<Reservation> result = reportingComponent.byPlate(plate);
+
                         if (result.getTotalCount() == 0) {
                             System.out.println("No reservations found.");
                             break;
@@ -146,13 +146,26 @@ public class Main {
                         System.out.print("Enter reservation id: ");
                         int id = Integer.parseInt(scanner.nextLine());
 
-                        Reservation reservation = reservationService.getReservationById(id);
+                        Reservation reservation = null;
 
-                        //Using paymentComponent
+                        for (Reservation r : result.getItems()) {
+                            if (r.getId() == id) {
+                                reservation = r;
+                                break;
+                            }
+                        }
+
+                        if (reservation == null) {
+                            System.out.println("Reservation not found!");
+                            break;
+                        }
+
                         Invoice invoice = paymentComponent.buildInvoice(reservation, plate);
 
                         System.out.println(invoice);
                     }
+
+
 
                     case 5 -> {
 

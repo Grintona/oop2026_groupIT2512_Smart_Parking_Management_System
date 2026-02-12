@@ -1,16 +1,16 @@
 package edu.aitu.oop3.components;
 
-import edu.aitu.oop3.common.ListResult;
-import edu.aitu.oop3.entities.ParkingSpot;
-import edu.aitu.oop3.entities.Reservation;
+import edu.aitu.oop3.repositories.ParkingSpotRepository;
 
 public class MonitoringComponent {
 
-    public int countFreeSpots(ListResult<ParkingSpot> freeSpots) {
-        return freeSpots.getTotalCount();
+    private final ParkingSpotRepository parkingSpotRepository;
+
+    public MonitoringComponent(ParkingSpotRepository parkingSpotRepository) {
+        this.parkingSpotRepository = parkingSpotRepository;
     }
 
-    public int countActiveReservations(ListResult<Reservation> reservations) {
-        return reservations.getTotalCount();
+    public int countFreeSpots() {
+        return parkingSpotRepository.findFreeSpots().size();
     }
 }
